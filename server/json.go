@@ -1,6 +1,10 @@
-package common
+package server
 
-import "time"
+import (
+	"encoding/json"
+	"net/http"
+	"time"
+)
 
 type DTONetwork struct {
 	ID       uint
@@ -18,16 +22,30 @@ type DTOEvent struct {
 	NetworkId uint
 }
 
-func ConvertNetworkList(networks []Network) []DTONetwork {
+func WriteJsonResponse(w http.ResponseWriter, data interface{}) bool {
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		ErrorInternalServerError(w)
+		return false
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_, jsonErr := w.Write(jsonData)
+	return jsonErr == nil
+}
+
+func ConvertNetworkUserList(networkUsers []NetworkUser) []DTONetwork {
 	var networksDTO []DTONetwork
-	for _, n := range networks {
+	for _, nu := range networkUsers {
 		out := DTONetwork{
-			ID:      n.ID,
-			Name:    n.Name,
-			OwnerId: n.UserId,
+			ID:       nu.Network.ID,
+			Name:     nu.Network.Name,
+			OwnerId:  nu.Network.UserId,
+			ColorHex: nu.ColorHex,
 		}
 		networksDTO = append(networksDTO, out)
 	}
+
 	return networksDTO
 }
 

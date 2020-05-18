@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./common"
+	"../server"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,17 +11,18 @@ import (
 const serverPort = 8081
 
 func main() {
-	common.InitDatabase()
-	defer common.DB.Close()
-	common.InitStore()
-	initWebServer()
+	server.InitDatabase()
+	defer server.DB.Close()
+	server.InitStore()
+	InitWebServer()
 }
 
-func initWebServer() {
+func InitWebServer() {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/login", common.HandleLogin)
-	mux.HandleFunc("/events", common.HandleEvents)
+	mux.HandleFunc("/login", server.HandleLogin)
+	mux.HandleFunc("/events", server.HandleEvents)
+	mux.HandleFunc("/networks", server.HandleNetworks)
 
 	fmt.Printf("Starting web server on port %d...\n", serverPort)
 	log.Fatal(http.ListenAndServe("localhost:"+strconv.Itoa(serverPort), mux))

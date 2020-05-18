@@ -1,4 +1,4 @@
-package common
+package server
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ type User struct {
 	FirstName    string
 	LastName     string
 	Email        string
-	Networks     []Network
+	Networks     []Network `gorm:"many2many:network_user"`
 }
 
 type Network struct {
@@ -61,12 +61,11 @@ func InitDatabase() {
 	if err != nil {
 		panic("Failed to connect to database")
 	}
-
-	database.SingularTable(true)
-	database.AutoMigrate(&User{})
-	database.AutoMigrate(&Network{})
-	database.AutoMigrate(&Event{})
-	database.AutoMigrate(&NetworkUser{})
 	DB = database
+	DB.SingularTable(true)
+	DB.AutoMigrate(&User{})
+	DB.AutoMigrate(&Network{})
+	DB.AutoMigrate(&Event{})
+	DB.AutoMigrate(&NetworkUser{})
 	fmt.Println("Successfully initialized database connection")
 }
