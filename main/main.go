@@ -26,10 +26,15 @@ func InitWebServer() {
 
 	mux := http.NewServeMux()
 
+	mux.HandleFunc("/", handleHome)
 	mux.HandleFunc("/login", server.HandleLogin)
 	mux.HandleFunc("/events", server.HandleEvents)
 	mux.HandleFunc("/networks", server.HandleNetworks)
 
 	fmt.Printf("Starting web server on port %s...\n", port)
 	log.Fatal(http.ListenAndServe("localhost:"+port, mux))
+}
+
+func handleHome(w http.ResponseWriter, r *http.Request) {
+	return
 }
