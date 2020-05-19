@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 )
 
@@ -18,12 +19,17 @@ func main() {
 }
 
 func InitWebServer() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = strconv.Itoa(serverPort)
+	}
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/login", server.HandleLogin)
 	mux.HandleFunc("/events", server.HandleEvents)
 	mux.HandleFunc("/networks", server.HandleNetworks)
 
-	fmt.Printf("Starting web server on port %d...\n", serverPort)
-	log.Fatal(http.ListenAndServe("localhost:"+strconv.Itoa(serverPort), mux))
+	fmt.Printf("Starting web server on port %s...\n", port)
+	log.Fatal(http.ListenAndServe("localhost:"+port, mux))
 }
