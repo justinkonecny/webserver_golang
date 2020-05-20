@@ -13,7 +13,7 @@ const serverPort = 8081
 
 func main() {
 	fmt.Println("STARTING APP")
-	fmt.Printf("%s", os.Getenv("PORT"))
+	fmt.Printf("%s\n", os.Getenv("PORT"))
 
 	fmt.Println("STARTING DB")
 	server.InitDatabase()

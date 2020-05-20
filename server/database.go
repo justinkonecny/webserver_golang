@@ -59,6 +59,8 @@ func InitDatabase() {
 	dbInfo := fmt.Sprintf("%s:%s@(%s)/%s?charset=utf8&parseTime=True&loc=Local", dbUser, dbPassword, dbHost, dbSchema)
 	database, err := gorm.Open("mysql", dbInfo)
 	if err != nil {
+		fmt.Println("Error connecting to DB")
+		fmt.Println(err)
 		panic("Failed to connect to database")
 	}
 	DB = database
