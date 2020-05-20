@@ -12,15 +12,11 @@ import (
 const serverPort = 8081
 
 func main() {
-	fmt.Println("STARTING APP")
-	fmt.Printf("%s\n", os.Getenv("PORT"))
+	fmt.Println("Starting application...")
 
-	fmt.Println("STARTING DB")
 	server.InitDatabase()
 	defer server.DB.Close()
-	fmt.Println("STARTING STORE")
 	server.InitStore()
-	fmt.Println("STARTING WEBSERVER")
 	InitWebServer()
 }
 
@@ -38,7 +34,7 @@ func InitWebServer() {
 	mux.HandleFunc("/networks", server.HandleNetworks)
 
 	fmt.Printf("Starting web server on port %s...\n", port)
-	log.Fatal(http.ListenAndServe("localhost:"+port, mux))
+	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, mux))
 }
 
 func handleHome(w http.ResponseWriter, r *http.Request) {
