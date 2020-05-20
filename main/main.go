@@ -15,9 +15,12 @@ func main() {
 	fmt.Println("STARTING APP")
 	fmt.Printf("%s", os.Getenv("PORT"))
 
+	fmt.Println("STARTING DB")
 	server.InitDatabase()
 	defer server.DB.Close()
+	fmt.Println("STARTING STORE")
 	server.InitStore()
+	fmt.Println("STARTING WEBSERVER")
 	InitWebServer()
 }
 
