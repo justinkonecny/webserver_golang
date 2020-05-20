@@ -12,6 +12,9 @@ import (
 const serverPort = 8081
 
 func main() {
+	fmt.Println("STARTING APP")
+	fmt.Printf("%s", os.Getenv("PORT"))
+
 	server.InitDatabase()
 	defer server.DB.Close()
 	server.InitStore()
