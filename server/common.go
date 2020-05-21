@@ -4,9 +4,16 @@ import (
 	"net/http"
 )
 
-func AuthenticateRequest(r *http.Request) (bool, map[interface{}]interface{}) {
+func AuthenticateRequest(w http.ResponseWriter, r *http.Request) (bool, map[interface{}]interface{}) {
+	EnableCORS(w)
 	session, _ := Store.Get(r, "session_calendays")
 	return !session.IsNew, session.Values
+}
+
+func EnableCORS(w http.ResponseWriter) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 }
 
 func ErrorMethodNotAllowed(w http.ResponseWriter) {

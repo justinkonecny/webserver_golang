@@ -6,7 +6,7 @@ import (
 )
 
 func HandleEvents(w http.ResponseWriter, r *http.Request) {
-	auth, values := AuthenticateRequest(r)
+	auth, values := AuthenticateRequest(w, r)
 	if !auth {
 		ErrorUnauthorized(w)
 		return

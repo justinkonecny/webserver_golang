@@ -3,7 +3,6 @@ package main
 import (
 	"../server"
 	"fmt"
-	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -36,12 +35,11 @@ func InitWebServer() {
 	router.HandleFunc("/networks", server.HandleNetworks)
 
 	fmt.Printf("Starting web server on port %s...\n", port)
-	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, handlers.CORS(
-		handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
-		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS"}),
-		handlers.AllowedOrigins([]string{"*"}))(router)))
+	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, router))
 }
 
 func handleHome(w http.ResponseWriter, r *http.Request) {
-	return
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 }
