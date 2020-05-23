@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -18,13 +19,13 @@ func HandleEvents(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		handleEventsGet(w, userID)
 	case http.MethodPost:
-		fmt.Println("POST /events")
+		handleEventsPost(w, r, userID)
 	case http.MethodPut:
 		fmt.Println("PUT /events")
 	case http.MethodDelete:
 		fmt.Println("DELETE /events")
 	default:
-		ErrorMethodNotAllowed(w)
+		ErrorMethodNotAllowed(w, r)
 	}
 }
 
@@ -43,4 +44,26 @@ func handleEventsGet(w http.ResponseWriter, userID uint) {
 	}
 
 	WriteJsonResponse(w, eventsResponse)
+}
+
+func handleEventsPost(w http.ResponseWriter, r *http.Request, userID uint) {
+	fmt.Println("POST /events")
+	var eventDTO DTOEvent
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&eventDTO)
+	if err != nil {
+		ErrorBadRequest(w, err)
+		return
+	}
+
+	event := Event{
+		Name:      eventDTO.Name,
+		StartDate: eventDTO.StartDate,
+		EndDate:   eventDTO.EndDate,
+		Location:  eventDTO.Location,
+		Message:   eventDTO.Message,
+		NetworkId: eventDTO.NetworkId,
+	}
+	DB.Create(&event)
+	WriteJsonResponse(w, ConvertEvent(event))
 }

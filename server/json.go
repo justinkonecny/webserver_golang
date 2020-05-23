@@ -6,17 +6,26 @@ import (
 	"time"
 )
 
+type DTOUser struct {
+	ID        uint
+	FirstName string
+	LastName  string
+	Email     string
+}
+
 type DTONetwork struct {
 	ID       uint
 	Name     string
 	OwnerId  uint
 	ColorHex string
+	Members  []DTOUser
 }
 
 type DTOEvent struct {
 	ID        uint
 	StartDate time.Time
 	EndDate   time.Time
+	Name      string
 	Location  string
 	Message   string
 	NetworkId uint
@@ -42,11 +51,25 @@ func ConvertNetworkUserList(networkUsers []NetworkUser) []DTONetwork {
 			Name:     nu.Network.Name,
 			OwnerId:  nu.Network.UserId,
 			ColorHex: nu.ColorHex,
+			Members:  ConvertUserList(nu.Network.Users),
 		}
 		networksDTO = append(networksDTO, out)
 	}
-
 	return networksDTO
+}
+
+func ConvertUserList(users []User) []DTOUser {
+	var usersDTO []DTOUser
+	for _, u := range users {
+		out := DTOUser{
+			ID:        u.ID,
+			FirstName: u.FirstName,
+			LastName:  u.LastName,
+			Email:     u.Email,
+		}
+		usersDTO = append(usersDTO, out)
+	}
+	return usersDTO
 }
 
 func ConvertEventList(events []Event, networkID uint) []DTOEvent {
@@ -56,6 +79,7 @@ func ConvertEventList(events []Event, networkID uint) []DTOEvent {
 			ID:        e.ID,
 			StartDate: e.StartDate,
 			EndDate:   e.EndDate,
+			Name:      e.Name,
 			Location:  e.Location,
 			Message:   e.Message,
 			NetworkId: networkID,
@@ -63,4 +87,16 @@ func ConvertEventList(events []Event, networkID uint) []DTOEvent {
 		eventsDTO = append(eventsDTO, out)
 	}
 	return eventsDTO
+}
+
+func ConvertEvent(event Event) DTOEvent {
+	return DTOEvent{
+		ID:        event.ID,
+		StartDate: event.StartDate,
+		EndDate:   event.EndDate,
+		Name:      event.Name,
+		Location:  event.Location,
+		Message:   event.Message,
+		NetworkId: event.NetworkId,
+	}
 }

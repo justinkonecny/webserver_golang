@@ -24,13 +24,13 @@ func HandleNetworks(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete:
 		fmt.Println("DELETE /networks")
 	default:
-		ErrorMethodNotAllowed(w)
+		ErrorMethodNotAllowed(w, r)
 	}
 }
 
 func handleNetworksGet(w http.ResponseWriter, userID uint) {
 	fmt.Println("GET /networks")
 	var networkUsers []NetworkUser
-	DB.Preload("Network").Where(&NetworkUser{UserId: userID}).Find(&networkUsers)
+	DB.Preload("Network.Users").Where(&NetworkUser{UserId: userID}).Find(&networkUsers)
 	WriteJsonResponse(w, ConvertNetworkUserList(networkUsers))
 }

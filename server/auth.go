@@ -7,8 +7,9 @@ import (
 )
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
+	EnableCORS(w)
 	if r.Method != http.MethodPost {
-		ErrorMethodNotAllowed(w)
+		ErrorMethodNotAllowed(w, r)
 		return
 	}
 
@@ -21,7 +22,6 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	userID := session.Values[KeyUserID]
 	fmt.Println("UUID:", firebaseUUID)
 	fmt.Println("UserID:", userID)
-	EnableCORS(w)
 }
 
 func processNewSession(session *sessions.Session, w http.ResponseWriter, r *http.Request) bool {

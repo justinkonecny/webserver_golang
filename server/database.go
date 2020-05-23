@@ -23,12 +23,14 @@ type Network struct {
 	Name   string
 	UserId uint
 	User   User
+	Users  []User `gorm:"many2many:network_user"`
 }
 
 type Event struct {
 	gorm.Model
 	StartDate time.Time
 	EndDate   time.Time
+	Name      string
 	Location  string
 	Message   string
 	NetworkId uint
