@@ -9,7 +9,7 @@ import (
 func HandleEvents(w http.ResponseWriter, r *http.Request) {
 	auth, values := AuthenticateRequest(w, r)
 	if !auth {
-		ErrorUnauthorized(w)
+		ErrorUnauthorized(w, r)
 		return
 	}
 
@@ -19,7 +19,7 @@ func HandleEvents(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		handleEventsGet(w, userID)
 	case http.MethodPost:
-		handleEventsPost(w, r, userID)
+		handleEventsPost(w, r)
 	case http.MethodPut:
 		fmt.Println("PUT /events")
 	case http.MethodDelete:
@@ -46,13 +46,13 @@ func handleEventsGet(w http.ResponseWriter, userID uint) {
 	WriteJsonResponse(w, eventsResponse)
 }
 
-func handleEventsPost(w http.ResponseWriter, r *http.Request, userID uint) {
+func handleEventsPost(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("POST /events")
 	var eventDTO DTOEvent
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&eventDTO)
 	if err != nil {
-		ErrorBadRequest(w, err)
+		ErrorBadRequest(w, r, err)
 		return
 	}
 

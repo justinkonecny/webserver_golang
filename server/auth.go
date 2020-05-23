@@ -20,8 +20,10 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 
 	firebaseUUID := session.Values[KeyFirebaseUUID]
 	userID := session.Values[KeyUserID]
+	userEmail := session.Values[KeyUserEmail]
 	fmt.Println("UUID:", firebaseUUID)
 	fmt.Println("UserID:", userID)
+	fmt.Println("UserEmail:", userEmail)
 }
 
 func processNewSession(session *sessions.Session, w http.ResponseWriter, r *http.Request) bool {
@@ -43,6 +45,7 @@ func processNewSession(session *sessions.Session, w http.ResponseWriter, r *http
 
 	session.Values[KeyFirebaseUUID] = firebaseUUID
 	session.Values[KeyUserID] = user.ID
+	session.Values[KeyUserEmail] = user.Email
 	if err := session.Save(r, w); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return false

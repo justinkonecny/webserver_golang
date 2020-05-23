@@ -58,18 +58,14 @@ func ConvertNetworkUserList(networkUsers []NetworkUser) []DTONetwork {
 	return networksDTO
 }
 
-func ConvertUserList(users []User) []DTOUser {
-	var usersDTO []DTOUser
-	for _, u := range users {
-		out := DTOUser{
-			ID:        u.ID,
-			FirstName: u.FirstName,
-			LastName:  u.LastName,
-			Email:     u.Email,
-		}
-		usersDTO = append(usersDTO, out)
+func ConvertNetwork(network Network, colorHex string) DTONetwork {
+	return DTONetwork{
+		ID:       network.ID,
+		Name:     network.Name,
+		OwnerId:  network.UserId,
+		ColorHex: colorHex,
+		Members:  ConvertUserList(network.Users),
 	}
-	return usersDTO
 }
 
 func ConvertEventList(events []Event, networkID uint) []DTOEvent {
@@ -98,5 +94,28 @@ func ConvertEvent(event Event) DTOEvent {
 		Location:  event.Location,
 		Message:   event.Message,
 		NetworkId: event.NetworkId,
+	}
+}
+
+func ConvertUserList(users []User) []DTOUser {
+	var usersDTO []DTOUser
+	for _, u := range users {
+		out := DTOUser{
+			ID:        u.ID,
+			FirstName: u.FirstName,
+			LastName:  u.LastName,
+			Email:     u.Email,
+		}
+		usersDTO = append(usersDTO, out)
+	}
+	return usersDTO
+}
+
+func ConvertUser(user User) DTOUser {
+	return DTOUser{
+		ID:        user.ID,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Email:     user.Email,
 	}
 }

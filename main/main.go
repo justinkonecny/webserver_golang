@@ -33,6 +33,7 @@ func InitWebServer() {
 	router.HandleFunc("/login", server.HandleLogin)
 	router.HandleFunc("/events", server.HandleEvents)
 	router.HandleFunc("/networks", server.HandleNetworks)
+	router.HandleFunc("/users", server.HandleUsers)
 
 	fmt.Printf("Starting web server on port %s...\n", port)
 	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, router))
