@@ -7,10 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 )
-
-const serverPort = 8081
 
 func main() {
 	fmt.Println("Starting application...")
@@ -24,11 +21,11 @@ func main() {
 func InitWebServer() {
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = strconv.Itoa(serverPort)
+		port = "8081"
 	}
 
+	server.SetupCommon()
 	router := mux.NewRouter()
-
 	router.HandleFunc("/", handleHome)
 	router.HandleFunc("/login", server.HandleLogin)
 	router.HandleFunc("/events", server.HandleEvents)
@@ -40,5 +37,5 @@ func InitWebServer() {
 }
 
 func handleHome(w http.ResponseWriter, r *http.Request) {
-	server.EnableCORS(w)
+	server.EnableCORS(w, r)
 }

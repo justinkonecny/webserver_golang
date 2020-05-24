@@ -32,12 +32,17 @@ type DTOEvent struct {
 }
 
 func WriteJsonResponse(w http.ResponseWriter, data interface{}) bool {
+	return WriteJsonResponseWithStatus(w, data, http.StatusOK)
+}
+
+func WriteJsonResponseWithStatus(w http.ResponseWriter, data interface{}, status int) bool {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		ErrorInternalServerError(w)
 		return false
 	}
 
+	w.WriteHeader(status)
 	w.Header().Set("Content-Type", "application/json")
 	_, jsonErr := w.Write(jsonData)
 	return jsonErr == nil

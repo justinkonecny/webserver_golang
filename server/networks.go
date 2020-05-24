@@ -84,5 +84,5 @@ func handleNetworksPost(w http.ResponseWriter, r *http.Request, userID uint, use
 
 	var networkFinal Network
 	DB.Preload("Users").Where(&Network{}, network.ID).Find(&networkFinal)
-	WriteJsonResponse(w, ConvertNetwork(networkFinal, networkDTO.ColorHex))
+	WriteJsonResponseWithStatus(w, ConvertNetwork(networkFinal, networkDTO.ColorHex), http.StatusCreated)
 }

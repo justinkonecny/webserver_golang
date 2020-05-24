@@ -65,5 +65,5 @@ func handleEventsPost(w http.ResponseWriter, r *http.Request) {
 		NetworkId: eventDTO.NetworkId,
 	}
 	DB.Create(&event)
-	WriteJsonResponse(w, ConvertEvent(event))
+	WriteJsonResponseWithStatus(w, ConvertEvent(event), http.StatusCreated)
 }

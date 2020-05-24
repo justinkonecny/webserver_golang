@@ -7,7 +7,7 @@ import (
 )
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
-	EnableCORS(w)
+	EnableCORS(w, r)
 	if r.Method != http.MethodPost {
 		ErrorMethodNotAllowed(w, r)
 		return

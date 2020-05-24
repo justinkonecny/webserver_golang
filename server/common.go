@@ -1,21 +1,51 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
+	"os"
+	"strconv"
 )
 
+var isDevEnv bool
+
+func SetupCommon() {
+	dev, err := strconv.ParseBool(os.Getenv("DEV"))
+	if err != nil {
+		isDevEnv = false
+	} else {
+		isDevEnv = dev
+	}
+}
+
 func AuthenticateRequest(w http.ResponseWriter, r *http.Request) (bool, map[interface{}]interface{}) {
-	EnableCORS(w)
+	EnableCORS(w, r)
 	session, _ := Store.Get(r, "session_calendays")
 	return !session.IsNew, session.Values
 }
 
-func EnableCORS(w http.ResponseWriter) {
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+func EnableCORS(w http.ResponseWriter, r *http.Request) {
+	origins := [1]string{
+		"https://calendays.jkonecny.com",
+	}
+
+	allowedOrigin := "https://jkonecny.com"
+	if isDevEnv {
+		allowedOrigin = "http://localhost:3000"
+	} else {
+		for _, origin := range origins {
+			if r.Header.Get("Origin") == origin {
+				allowedOrigin = origin
+				fmt.Printf("Matching origin: '%s'\n", origin)
+				break
+			}
+		}
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
+	w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, GET, POST, PUT, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, FirebaseUUID")
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
-	w.Header().Set("Vary", "Origin")
 }
 
 func ErrorMethodNotAllowed(w http.ResponseWriter, r *http.Request) {
