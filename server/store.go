@@ -13,6 +13,7 @@ const cookieAgeMinutes = 60
 const KeyFirebaseUUID = "FirebaseUUID"
 const KeyUserID = "UserID"
 const KeyUserEmail = "UserEmail"
+const KeyUsername = "Username"
 
 func InitStore() {
 	storeSecretKey := os.Getenv("STORE_SK")

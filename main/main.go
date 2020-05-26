@@ -28,6 +28,7 @@ func InitWebServer() {
 	router := mux.NewRouter()
 	router.HandleFunc("/", handleHome)
 	router.HandleFunc("/login", server.HandleLogin)
+	router.HandleFunc("/signup", server.HandleSignup)
 	router.HandleFunc("/events", server.HandleEvents)
 	router.HandleFunc("/networks", server.HandleNetworks)
 	router.HandleFunc("/users", server.HandleUsers)

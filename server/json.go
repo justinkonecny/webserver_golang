@@ -6,11 +6,20 @@ import (
 	"time"
 )
 
+type DTOUserSignup struct {
+	FirstName    string
+	LastName     string
+	Email        string
+	Username     string
+	FirebaseUUID string
+}
+
 type DTOUser struct {
 	ID        uint
 	FirstName string
 	LastName  string
 	Email     string
+	Username  string
 }
 
 type DTONetwork struct {
@@ -110,6 +119,7 @@ func ConvertUserList(users []User) []DTOUser {
 			FirstName: u.FirstName,
 			LastName:  u.LastName,
 			Email:     u.Email,
+			Username:  u.Username,
 		}
 		usersDTO = append(usersDTO, out)
 	}
@@ -122,5 +132,6 @@ func ConvertUser(user User) DTOUser {
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Email:     user.Email,
+		Username:  user.Username,
 	}
 }
