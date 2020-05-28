@@ -29,6 +29,9 @@ func InitWebServer() {
 	router.HandleFunc("/", handleHome)
 	router.HandleFunc("/login", server.HandleLogin)
 	router.HandleFunc("/signup", server.HandleSignup)
+
+	router.HandleFunc("/status/username", server.HandleUsername)
+
 	router.HandleFunc("/events", server.HandleEvents)
 	router.HandleFunc("/networks", server.HandleNetworks)
 	router.HandleFunc("/users", server.HandleUsers)

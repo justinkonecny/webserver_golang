@@ -7,6 +7,10 @@ import (
 	"net/http"
 )
 
+type StatusUsername struct {
+	Username string
+}
+
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	EnableCORS(w, r)
 	if r.Method != http.MethodPost {
@@ -48,10 +52,79 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 	var users []User
 	DB.Where("email = ? OR username = ? OR firebase_uuid = ?", userDTO.Email, userDTO.Username, userDTO.FirebaseUUID).Find(&users)
 
-	if len(users) != 1 {
-		_, _ = w.Write([]byte("User already exists"))
-		w.WriteHeader(http.StatusConflict)
+	if len(users) != 0 {
+		existingUsername := false
+		existingEmail := false
+		existingFirebaseUUID := false
+		user := users[0]
+
+		if user.Email == userDTO.Email {
+			existingEmail = true
+		}
+		if user.Username == userDTO.Username {
+			existingUsername = true
+		}
+		if user.FirebaseUuid == userDTO.FirebaseUUID {
+			existingFirebaseUUID = true
+		}
+
+		statusFailed := map[string]bool{
+			"ExistingEmail":        existingEmail,
+			"ExistingUsername":     existingUsername,
+			"ExistingFirebaseUUID": existingFirebaseUUID,
+			"Success":              false,
+		}
+
+		WriteJsonResponseWithStatus(w, statusFailed, http.StatusConflict)
 		return
+	}
+
+	newUser := User{
+		FirebaseUuid: userDTO.FirebaseUUID,
+		FirstName:    userDTO.FirstName,
+		LastName:     userDTO.LastName,
+		Email:        userDTO.Email,
+		Username:     userDTO.Username,
+	}
+
+	DB.NewRecord(&newUser)
+	statusSuccess := map[string]bool{
+		"ExistingEmail":        false,
+		"ExistingUsername":     false,
+		"ExistingFirebaseUUID": false,
+		"Success":              true,
+	}
+
+	WriteJsonResponseWithStatus(w, statusSuccess, http.StatusCreated)
+}
+
+func HandleUsername(w http.ResponseWriter, r *http.Request) {
+	EnableCORS(w, r)
+	if r.Method != http.MethodPost {
+		ErrorMethodNotAllowed(w, r)
+		return
+	}
+
+	fmt.Println("POST /status/username")
+	var statusUsername StatusUsername
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&statusUsername)
+	if err != nil {
+		ErrorBadRequest(w, r, err)
+		return
+	}
+
+	var user User
+	if notFound := DB.Where(&User{Username: statusUsername.Username}).First(&user).RecordNotFound(); notFound {
+		statusUnique := map[string]bool{
+			"ExistingUsername": false,
+		}
+		WriteJsonResponse(w, statusUnique)
+	} else {
+		statusConflict := map[string]bool{
+			"ExistingUsername": true,
+		}
+		WriteJsonResponse(w, statusConflict)
 	}
 }
 
