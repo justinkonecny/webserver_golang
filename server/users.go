@@ -31,6 +31,6 @@ func HandleUsers(w http.ResponseWriter, r *http.Request) {
 func handleUsersGet(w http.ResponseWriter, userID uint) {
 	fmt.Println("GET /users")
 	var user User
-	DB.Where(&User{}, userID).First(&user)
+	DB.First(&user, userID)
 	WriteJsonResponse(w, ConvertUser(user))
 }

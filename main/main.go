@@ -30,7 +30,7 @@ func InitWebServer() {
 	router.HandleFunc("/login", server.HandleLogin)
 	router.HandleFunc("/signup", server.HandleSignup)
 
-	router.HandleFunc("/status/username", server.HandleUsername)
+	router.HandleFunc("/status/user", server.HandleStatusUser)
 
 	router.HandleFunc("/events", server.HandleEvents)
 	router.HandleFunc("/networks", server.HandleNetworks)

@@ -51,8 +51,8 @@ func WriteJsonResponseWithStatus(w http.ResponseWriter, data interface{}, status
 		return false
 	}
 
-	w.WriteHeader(status)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
 	_, jsonErr := w.Write(jsonData)
 	return jsonErr == nil
 }

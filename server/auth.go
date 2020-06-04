@@ -7,8 +7,9 @@ import (
 	"net/http"
 )
 
-type StatusUsername struct {
+type StatusUser struct {
 	Username string
+	Email    string
 }
 
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
@@ -18,9 +19,24 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, _ := Store.Get(r, "session_calendays")
-	if session.IsNew && !processNewSession(session, w, r) {
-		return // Something went wrong creating a new session
+	fmt.Println("POST /login")
+
+	var session *sessions.Session
+	headerFirebaseUUID := r.Header.Values(KeyFirebaseUUID)
+	if len(headerFirebaseUUID) == 1 {
+		fmt.Println("New")
+		session, _ = Store.Get(r, "session_calendays")
+		if !processNewSession(session, w, r) {
+			fmt.Println("(AE01): Error creating new session")
+			return // Something went wrong creating a new session
+		}
+	} else {
+		fmt.Println("Existing")
+		session, _ = Store.Get(r, "session_calendays")
+		if session.IsNew && !processNewSession(session, w, r) {
+			fmt.Println("(AE02): Error creating new session")
+			return // Something went wrong creating a new session
+		}
 	}
 
 	firebaseUUID := session.Values[KeyFirebaseUUID]
@@ -75,6 +91,7 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 			"Success":              false,
 		}
 
+		fmt.Println("(AE03) User sign up failed!")
 		WriteJsonResponseWithStatus(w, statusFailed, http.StatusConflict)
 		return
 	}
@@ -87,7 +104,19 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 		Username:     userDTO.Username,
 	}
 
-	DB.NewRecord(&newUser)
+	if err := DB.Create(&newUser).Error; err != nil {
+		fmt.Println("(AE04) User sign record creation failed!")
+		fmt.Println(err)
+		statusError := map[string]bool{
+			"ExistingEmail":        false,
+			"ExistingUsername":     false,
+			"ExistingFirebaseUUID": false,
+			"Success":              false,
+		}
+		WriteJsonResponseWithStatus(w, statusError, http.StatusInternalServerError)
+		return
+	}
+
 	statusSuccess := map[string]bool{
 		"ExistingEmail":        false,
 		"ExistingUsername":     false,
@@ -98,34 +127,30 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 	WriteJsonResponseWithStatus(w, statusSuccess, http.StatusCreated)
 }
 
-func HandleUsername(w http.ResponseWriter, r *http.Request) {
+func HandleStatusUser(w http.ResponseWriter, r *http.Request) {
 	EnableCORS(w, r)
 	if r.Method != http.MethodPost {
 		ErrorMethodNotAllowed(w, r)
 		return
 	}
 
-	fmt.Println("POST /status/username")
-	var statusUsername StatusUsername
+	fmt.Println("POST /status/user")
+	var statusUser StatusUser
 	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&statusUsername)
+	err := decoder.Decode(&statusUser)
 	if err != nil {
 		ErrorBadRequest(w, r, err)
 		return
 	}
 
-	var user User
-	if notFound := DB.Where(&User{Username: statusUsername.Username}).First(&user).RecordNotFound(); notFound {
-		statusUnique := map[string]bool{
-			"ExistingUsername": false,
-		}
-		WriteJsonResponse(w, statusUnique)
-	} else {
-		statusConflict := map[string]bool{
-			"ExistingUsername": true,
-		}
-		WriteJsonResponse(w, statusConflict)
+	usernameNotFound := DB.Where(&User{Username: statusUser.Username}).First(&User{}).RecordNotFound()
+	emailNotFound := DB.Where(&User{Email: statusUser.Email}).First(&User{}).RecordNotFound()
+
+	status := map[string]bool{
+		"ExistingUsername": !usernameNotFound,
+		"ExistingEmail":    !emailNotFound,
 	}
+	WriteJsonResponse(w, status)
 }
 
 func processNewSession(session *sessions.Session, w http.ResponseWriter, r *http.Request) bool {
@@ -148,6 +173,7 @@ func processNewSession(session *sessions.Session, w http.ResponseWriter, r *http
 	session.Values[KeyFirebaseUUID] = firebaseUUID
 	session.Values[KeyUserID] = user.ID
 	session.Values[KeyUserEmail] = user.Email
+	session.Values[KeyUsername] = user.Username
 	if err := session.Save(r, w); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return false
