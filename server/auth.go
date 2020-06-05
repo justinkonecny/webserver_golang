@@ -103,17 +103,32 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 		Email:        userDTO.Email,
 		Username:     userDTO.Username,
 	}
-
 	if err := DB.Create(&newUser).Error; err != nil {
-		fmt.Println("(AE04) User sign record creation failed!")
+		fmt.Println("(AE04) User record creation failed!")
 		fmt.Println(err)
-		statusError := map[string]bool{
-			"ExistingEmail":        false,
-			"ExistingUsername":     false,
-			"ExistingFirebaseUUID": false,
-			"Success":              false,
-		}
-		WriteJsonResponseWithStatus(w, statusError, http.StatusInternalServerError)
+		writeSignupFailedResponse(w, false, false, false)
+		return
+	}
+
+	personalNetwork := Network{
+		Name:   "Personal",
+		UserId: newUser.ID,
+	}
+	if err := DB.Create(&personalNetwork).Error; err != nil {
+		fmt.Println("(AE05) User network record creation failed!")
+		fmt.Println(err)
+		writeSignupFailedResponse(w, false, false, false)
+		return
+	}
+
+	personalNetworkUser := NetworkUser{
+		UserId:    newUser.ID,
+		NetworkId: personalNetwork.ID,
+	}
+	if err := DB.Create(&personalNetworkUser).Error; err != nil {
+		fmt.Println("(AE05) User user-network record creation failed!")
+		fmt.Println(err)
+		writeSignupFailedResponse(w, false, false, false)
 		return
 	}
 
@@ -125,6 +140,16 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	WriteJsonResponseWithStatus(w, statusSuccess, http.StatusCreated)
+}
+
+func writeSignupFailedResponse(w http.ResponseWriter, existingEmail bool, existingUsername bool, existingUUID bool) {
+	statusError := map[string]bool{
+		"ExistingEmail":        existingEmail,
+		"ExistingUsername":     existingUsername,
+		"ExistingFirebaseUUID": existingUUID,
+		"Success":              false,
+	}
+	WriteJsonResponseWithStatus(w, statusError, http.StatusInternalServerError)
 }
 
 func HandleStatusUser(w http.ResponseWriter, r *http.Request) {

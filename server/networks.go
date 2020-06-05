@@ -14,13 +14,13 @@ func HandleNetworks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userID := values[KeyUserID].(uint)
-	userEmail := values[KeyUserEmail].(string)
+	username := values[KeyUsername].(string)
 
 	switch r.Method {
 	case http.MethodGet:
 		handleNetworksGet(w, userID)
 	case http.MethodPost:
-		handleNetworksPost(w, r, userID, userEmail)
+		handleNetworksPost(w, r, userID, username)
 	case http.MethodPut:
 		fmt.Println("PUT /networks")
 	case http.MethodDelete:
@@ -37,7 +37,7 @@ func handleNetworksGet(w http.ResponseWriter, userID uint) {
 	WriteJsonResponse(w, ConvertNetworkUserList(networkUsers))
 }
 
-func handleNetworksPost(w http.ResponseWriter, r *http.Request, userID uint, userEmail string) {
+func handleNetworksPost(w http.ResponseWriter, r *http.Request, userID uint, username string) {
 	fmt.Println("POST /networks")
 	var networkDTO DTONetwork
 	decoder := json.NewDecoder(r.Body)
@@ -56,10 +56,10 @@ func handleNetworksPost(w http.ResponseWriter, r *http.Request, userID uint, use
 	addedOwner := false
 	for _, uDTO := range networkDTO.Members {
 		var user User
-		if uDTO.Email == userEmail {
+		if uDTO.Username == username {
 			addedOwner = true
 		}
-		if DB.Where(&User{Email: uDTO.Email}).First(&user).RecordNotFound() {
+		if DB.Where(&User{Username: uDTO.Username}).First(&user).RecordNotFound() {
 			continue
 		}
 
