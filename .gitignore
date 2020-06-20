@@ -2,3 +2,5 @@
 out/
 fs/
 deploy.sh
+fullchain.pem
+privkey.pem

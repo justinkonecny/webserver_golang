@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 func main() {
@@ -19,9 +20,19 @@ func main() {
 }
 
 func InitWebServer() {
+	isDevEnv := false
+	dev, err := strconv.ParseBool(os.Getenv("DEV"))
+	if err == nil {
+		isDevEnv = dev
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8081"
+		if isDevEnv {
+			port = "8080"
+		} else {
+			port = "8443"
+		}
 	}
 
 	server.SetupCommon()
@@ -37,7 +48,13 @@ func InitWebServer() {
 	router.HandleFunc("/users", server.HandleUsers)
 
 	fmt.Printf("Starting web server on port %s...\n", port)
-	log.Fatal(http.ListenAndServe("0.0.0.0:"+port, router))
+
+	if isDevEnv {
+		log.Fatal(http.ListenAndServe("0.0.0.0:"+port, router))
+	} else {
+		log.Fatal(http.ListenAndServeTLS("0.0.0.0:"+port, "fullchain.pem", "privkey.pem", router))
+
+	}
 }
 
 func handleHome(w http.ResponseWriter, r *http.Request) {

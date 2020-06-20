@@ -25,8 +25,9 @@ func AuthenticateRequest(w http.ResponseWriter, r *http.Request) (bool, map[inte
 }
 
 func EnableCORS(w http.ResponseWriter, r *http.Request) {
-	origins := [1]string{
+	origins := [2]string{
 		"https://calendays.jkonecny.com",
+		"https://www.calendays.jkonecny.com",
 	}
 
 	allowedOrigin := "https://jkonecny.com"
