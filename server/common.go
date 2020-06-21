@@ -8,6 +8,9 @@ import (
 )
 
 var isDevEnv bool
+//var SNSNeverSubscribedID uint
+var SNSSubscribedID uint
+//var SNSUnsubscribedID uint
 
 func SetupCommon() {
 	dev, err := strconv.ParseBool(os.Getenv("DEV"))
@@ -16,6 +19,10 @@ func SetupCommon() {
 	} else {
 		isDevEnv = dev
 	}
+
+	//SNSNeverSubscribedID = 1
+	SNSSubscribedID = 2
+	//SNSUnsubscribedID = 3
 }
 
 func AuthenticateRequest(w http.ResponseWriter, r *http.Request) (bool, map[interface{}]interface{}) {
@@ -25,9 +32,10 @@ func AuthenticateRequest(w http.ResponseWriter, r *http.Request) (bool, map[inte
 }
 
 func EnableCORS(w http.ResponseWriter, r *http.Request) {
-	origins := [2]string{
+	origins := [3]string{
 		"https://calendays.jkonecny.com",
 		"https://www.calendays.jkonecny.com",
+		"https://www.jkonecny.com",
 	}
 
 	allowedOrigin := "https://jkonecny.com"
@@ -47,36 +55,4 @@ func EnableCORS(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, GET, POST, PUT, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, FirebaseUUID")
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
-}
-
-func ErrorMethodNotAllowed(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "OPTIONS" {
-		return
-	}
-
-	w.WriteHeader(http.StatusMethodNotAllowed)
-	_, _ = w.Write([]byte("Method not allowed"))
-}
-
-func ErrorUnauthorized(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "OPTIONS" {
-		return
-	}
-
-	w.WriteHeader(http.StatusUnauthorized)
-	_, _ = w.Write([]byte("Unauthorized"))
-}
-
-func ErrorInternalServerError(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusInternalServerError)
-	_, _ = w.Write([]byte("Oops, something went wrong"))
-}
-
-func ErrorBadRequest(w http.ResponseWriter, r *http.Request, err error) {
-	if r.Method == "OPTIONS" {
-		return
-	}
-
-	w.WriteHeader(http.StatusBadRequest)
-	_, _ = w.Write([]byte("Invalid request body: " + err.Error()))
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gorilla/sessions"
 	"os"
+	"sync"
 )
 
 var Store *sessions.FilesystemStore
@@ -15,7 +16,8 @@ const KeyUserID = "UserID"
 const KeyUserEmail = "UserEmail"
 const KeyUsername = "Username"
 
-func InitStore() {
+func InitStore(wg *sync.WaitGroup) {
+	defer wg.Done()
 	storeSecretKey := os.Getenv("STORE_SK")
 	if storeSecretKey == "" {
 		panic("Missing session Store secret key")

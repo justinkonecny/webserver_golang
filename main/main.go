@@ -8,14 +8,22 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"sync"
 )
 
 func main() {
 	fmt.Println("Starting application...")
 
-	server.InitDatabase()
+	var wg sync.WaitGroup
+	wg.Add(3)
+
+	go server.InitAWS(&wg)
+	go server.InitStore(&wg)
+	go server.InitDatabase(&wg)
+
+	wg.Wait()
+
 	defer server.DB.Close()
-	server.InitStore()
 	InitWebServer()
 }
 
@@ -37,15 +45,17 @@ func InitWebServer() {
 
 	server.SetupCommon()
 	router := mux.NewRouter()
-	router.HandleFunc("/", handleHome)
 	router.HandleFunc("/login", server.HandleLogin)
 	router.HandleFunc("/signup", server.HandleSignup)
-
-	router.HandleFunc("/status/user", server.HandleStatusUser)
 
 	router.HandleFunc("/events", server.HandleEvents)
 	router.HandleFunc("/networks", server.HandleNetworks)
 	router.HandleFunc("/users", server.HandleUsers)
+
+	router.HandleFunc("/status/user", server.HandleStatusUser)
+	//router.HandleFunc("/notifications/subscribe", server.HandleSubscribe)
+
+	router.HandleFunc("/", handleHome)
 
 	fmt.Printf("Starting web server on port %s...\n", port)
 

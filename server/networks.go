@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 )
 
 func HandleNetworks(w http.ResponseWriter, r *http.Request) {
@@ -85,4 +86,28 @@ func handleNetworksPost(w http.ResponseWriter, r *http.Request, userID uint, use
 	var networkFinal Network
 	DB.Preload("Users").Where(&Network{}, network.ID).Find(&networkFinal)
 	WriteJsonResponseWithStatus(w, ConvertNetwork(networkFinal, networkDTO.ColorHex), http.StatusCreated)
+}
+
+func NotifyAllNetworkMembers(networkID uint, message string) {
+	var network Network
+	if DB.Preload("Users").First(&network, networkID).RecordNotFound() {
+		return
+	}
+
+	smsMessage := fmt.Sprintf("[%s] %s", network.Name, message)
+
+	count := 0
+	for _, user := range network.Users {
+		if user.MobilePhone == "" {
+			continue
+		}
+		_, errConv := strconv.Atoi(user.MobilePhone)
+		if errConv != nil || len(user.MobilePhone) != 10 {
+			continue
+		}
+
+		if err := SendSMS(user.MobilePhone, smsMessage); err != nil {
+			count++
+		}
+	}
 }

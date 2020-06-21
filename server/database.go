@@ -6,17 +6,25 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"os"
+	"sync"
 	"time"
 )
 
 type User struct {
 	gorm.Model
-	FirebaseUuid string
-	FirstName    string
-	LastName     string
-	Email        string
-	Username     string
-	Networks     []Network `gorm:"many2many:network_user"`
+	FirebaseUuid            string
+	FirstName               string
+	LastName                string
+	Email                   string
+	Username                string
+	MobilePhone             string
+	SubscriptionSnsStatusId uint
+	Networks                []Network `gorm:"many2many:network_user"`
+}
+
+type SubscriptionSnsStatus struct {
+	gorm.Model
+	Status string
 }
 
 type Network struct {
@@ -49,7 +57,8 @@ type NetworkUser struct {
 
 var DB *gorm.DB
 
-func InitDatabase() {
+func InitDatabase(wg *sync.WaitGroup) {
+	defer wg.Done()
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbHost := os.Getenv("DB_HOST")
