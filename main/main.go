@@ -53,7 +53,11 @@ func InitWebServer() {
 	router.HandleFunc("/users", server.HandleUsers)
 
 	router.HandleFunc("/status/user", server.HandleStatusUser)
-	//router.HandleFunc("/notifications/subscribe", server.HandleSubscribe)
+
+	if !isDevEnv {
+		// Don't register these routes in a development environment
+		router.HandleFunc("/notifications/subscribe", server.HandleSubscribe)
+	}
 
 	router.HandleFunc("/", handleHome)
 

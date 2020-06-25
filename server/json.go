@@ -15,11 +15,12 @@ type DTOUserSignup struct {
 }
 
 type DTOUser struct {
-	ID        uint
-	FirstName string
-	LastName  string
-	Email     string
-	Username  string
+	ID                   uint
+	FirstName            string
+	LastName             string
+	Email                string
+	Username             string
+	SubscriptionStatusID uint
 }
 
 type DTONetwork struct {
@@ -115,11 +116,12 @@ func ConvertUserList(users []User) []DTOUser {
 	var usersDTO []DTOUser
 	for _, u := range users {
 		out := DTOUser{
-			ID:        u.ID,
-			FirstName: u.FirstName,
-			LastName:  u.LastName,
-			Email:     u.Email,
-			Username:  u.Username,
+			ID:                   u.ID,
+			FirstName:            u.FirstName,
+			LastName:             u.LastName,
+			Email:                u.Email,
+			Username:             u.Username,
+			SubscriptionStatusID: u.SubscriptionSnsStatusId,
 		}
 		usersDTO = append(usersDTO, out)
 	}
@@ -128,10 +130,11 @@ func ConvertUserList(users []User) []DTOUser {
 
 func ConvertUser(user User) DTOUser {
 	return DTOUser{
-		ID:        user.ID,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		Email:     user.Email,
-		Username:  user.Username,
+		ID:                   user.ID,
+		FirstName:            user.FirstName,
+		LastName:             user.LastName,
+		Email:                user.Email,
+		Username:             user.Username,
+		SubscriptionStatusID: user.SubscriptionSnsStatusId,
 	}
 }

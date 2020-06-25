@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/aws/external"
@@ -19,6 +20,11 @@ var SNSClient *sns.Client
 
 func InitAWS(wg *sync.WaitGroup) {
 	defer wg.Done()
+
+	if isDevEnv {
+		return // Minimize the number of requests, since there is a limit
+	}
+
 	accessKeyId := os.Getenv("AWS_ACCESS_KEY_ID")
 	secretKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
 
@@ -62,6 +68,7 @@ func HandleSubscribe(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// handleSubscribePost subscribes the User with userID to AWS SNS event-based notifications.
 func handleSubscribePost(w http.ResponseWriter, r *http.Request, userID uint) {
 	fmt.Println("POST /notifications/subscribe")
 
@@ -115,6 +122,10 @@ func handleSubscribePost(w http.ResponseWriter, r *http.Request, userID uint) {
 }
 
 func SendSMS(phoneNumber string, message string) error {
+	if isDevEnv {
+		return errors.New("cannot send SMS in development environment")
+	}
+
 	req := SNSClient.PublishRequest(&sns.PublishInput{
 		Message:     aws.String(message),
 		PhoneNumber: aws.String(fmt.Sprintf("+1%s", phoneNumber)),

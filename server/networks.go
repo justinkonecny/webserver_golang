@@ -88,7 +88,7 @@ func handleNetworksPost(w http.ResponseWriter, r *http.Request, userID uint, use
 	WriteJsonResponseWithStatus(w, ConvertNetwork(networkFinal, networkDTO.ColorHex), http.StatusCreated)
 }
 
-func NotifyAllNetworkMembers(networkID uint, message string) {
+func NotifyAllNetworkMembers(networkID uint, message string, snsSubscriptionStatusId uint) {
 	var network Network
 	if DB.Preload("Users").First(&network, networkID).RecordNotFound() {
 		return
@@ -96,18 +96,24 @@ func NotifyAllNetworkMembers(networkID uint, message string) {
 
 	smsMessage := fmt.Sprintf("[%s] %s", network.Name, message)
 
-	count := 0
+	countSentSMS := 0
 	for _, user := range network.Users {
+		if snsSubscriptionStatusId != SNSSubscribedID {
+			continue // The User is not subscribed to SNS notifications
+		}
 		if user.MobilePhone == "" {
-			continue
+			continue // The User has not provided a phone number
 		}
 		_, errConv := strconv.Atoi(user.MobilePhone)
 		if errConv != nil || len(user.MobilePhone) != 10 {
+			continue // The User as provided an invalid phone number
+		}
+		if err := SendSMS(user.MobilePhone, smsMessage); err != nil {
+			fmt.Printf("Error sending SMS to '%s': %s", user.MobilePhone, err.Error())
 			continue
 		}
-
-		if err := SendSMS(user.MobilePhone, smsMessage); err != nil {
-			count++
-		}
+		countSentSMS++
 	}
+
+	fmt.Printf("Sent %d/%d SMS event notifications\n", countSentSMS, len(network.Users))
 }
