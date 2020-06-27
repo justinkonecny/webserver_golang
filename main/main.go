@@ -14,6 +14,8 @@ import (
 func main() {
 	fmt.Println("Starting application...")
 
+	server.SetupCommon()
+
 	var wg sync.WaitGroup
 	wg.Add(3)
 
@@ -42,8 +44,7 @@ func InitWebServer() {
 			port = "8443"
 		}
 	}
-
-	server.SetupCommon()
+	
 	router := mux.NewRouter()
 	router.HandleFunc("/login", server.HandleLogin)
 	router.HandleFunc("/signup", server.HandleSignup)
