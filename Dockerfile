@@ -1,6 +1,6 @@
 FROM golang:1.14.3
 
-EXPOSE 8081
+EXPOSE 8443
 
 WORKDIR /webserver
 
@@ -17,6 +17,7 @@ RUN go get github.com/aws/aws-sdk-go-v2/aws/external
 RUN go get github.com/aws/aws-sdk-go-v2/service/sns
 
 ADD main /webserver/main
+ADD ios /webserver/ios
 ADD server /webserver/server
 ADD fullchain.pem /webserver
 ADD privkey.pem /webserver

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"../ios"
 	"../server"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -17,8 +18,9 @@ func main() {
 	server.SetupCommon()
 
 	var wg sync.WaitGroup
-	wg.Add(3)
+	wg.Add(4)
 
+	go ios.InitIOS(&wg)
 	go server.InitAWS(&wg)
 	go server.InitStore(&wg)
 	go server.InitDatabase(&wg)
@@ -44,7 +46,7 @@ func InitWebServer() {
 			port = "8443"
 		}
 	}
-	
+
 	router := mux.NewRouter()
 	router.HandleFunc("/login", server.HandleLogin)
 	router.HandleFunc("/signup", server.HandleSignup)
@@ -59,6 +61,9 @@ func InitWebServer() {
 		// Don't register these routes in a development environment
 		router.HandleFunc("/notifications/subscribe", server.HandleSubscribe)
 	}
+
+	router.HandleFunc("/api/token", ios.HandleToken)
+	router.HandleFunc("/api/refresh_token", ios.HandleRefresh)
 
 	router.HandleFunc("/", handleHome)
 
