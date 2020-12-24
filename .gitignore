@@ -1,6 +1,5 @@
 .idea/
 out/
 fs/
-deploy.sh
-fullchain.pem
-privkey.pem
+scripts/*
+*.pem

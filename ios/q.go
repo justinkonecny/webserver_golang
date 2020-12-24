@@ -16,7 +16,7 @@ import (
 var clientID string
 var clientSecret string
 var authHeader string
-var clientCallback = "streamify://spotify-login-callback"
+var clientCallback = "q://spotify-login-callback"
 var spotifyAccountsEndpoint = "https://accounts.spotify.com/api/token"
 
 func InitIOS(wg *sync.WaitGroup) {

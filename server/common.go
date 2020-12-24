@@ -8,8 +8,10 @@ import (
 )
 
 var isDevEnv bool
+
 //var SNSNeverSubscribedID uint
 var SNSSubscribedID uint
+
 //var SNSUnsubscribedID uint
 
 func SetupCommon() {
@@ -32,16 +34,30 @@ func AuthenticateRequest(w http.ResponseWriter, r *http.Request) (bool, map[inte
 }
 
 func EnableCORS(w http.ResponseWriter, r *http.Request) {
-	origins := [3]string{
-		"https://calendays.jkonecny.com",
-		"https://www.calendays.jkonecny.com",
-		"https://www.jkonecny.com",
-	}
-
 	allowedOrigin := "https://jkonecny.com"
 	if isDevEnv {
-		allowedOrigin = "http://localhost:3000"
+		devOrigins := [2]string{
+			"http://localhost:3000",
+			"http://localhost:8080",
+		}
+
+		for _, origin := range devOrigins {
+			if r.Header.Get("Origin") == origin {
+				allowedOrigin = origin
+				fmt.Printf("Matching origin: '%s'\n", origin)
+				break
+			}
+		}
+
 	} else {
+		origins := [6]string{
+			"https://calendays.jkonecny.com",
+			"https://www.calendays.jkonecny.com",
+			"https://libertycars.jkonecny.com",
+			"https://www.libertycars.jkonecny.com",
+			"https://www.jkonecny.com",
+		}
+
 		for _, origin := range origins {
 			if r.Header.Get("Origin") == origin {
 				allowedOrigin = origin
@@ -56,3 +72,4 @@ func EnableCORS(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, FirebaseUUID")
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 }
+

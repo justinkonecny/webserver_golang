@@ -2,6 +2,7 @@ package main
 
 import (
 	"../ios"
+	"../libertycars"
 	"../server"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -18,10 +19,9 @@ func main() {
 	server.SetupCommon()
 
 	var wg sync.WaitGroup
-	wg.Add(4)
+	wg.Add(3)
 
 	go ios.InitIOS(&wg)
-	go server.InitAWS(&wg)
 	go server.InitStore(&wg)
 	go server.InitDatabase(&wg)
 
@@ -48,22 +48,20 @@ func InitWebServer() {
 	}
 
 	router := mux.NewRouter()
-	router.HandleFunc("/login", server.HandleLogin)
-	router.HandleFunc("/signup", server.HandleSignup)
+	router.HandleFunc("/c/login", server.HandleLogin)
+	router.HandleFunc("/c/signup", server.HandleSignup)
 
-	router.HandleFunc("/events", server.HandleEvents)
-	router.HandleFunc("/networks", server.HandleNetworks)
-	router.HandleFunc("/users", server.HandleUsers)
+	router.HandleFunc("/c/events", server.HandleEvents)
+	router.HandleFunc("/c/networks", server.HandleNetworks)
+	router.HandleFunc("/c/users", server.HandleUsers)
 
-	router.HandleFunc("/status/user", server.HandleStatusUser)
-
-	if !isDevEnv {
-		// Don't register these routes in a development environment
-		router.HandleFunc("/notifications/subscribe", server.HandleSubscribe)
-	}
+	router.HandleFunc("/c/status/user", server.HandleStatusUser)
 
 	router.HandleFunc("/api/token", ios.HandleToken)
 	router.HandleFunc("/api/refresh_token", ios.HandleRefresh)
+
+	router.HandleFunc("/lc/search", libertycars.HandleSearch)
+	router.HandleFunc("/lc/listing", libertycars.HandleListing)
 
 	router.HandleFunc("/", handleHome)
 

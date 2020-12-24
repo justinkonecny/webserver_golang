@@ -12,13 +12,11 @@ RUN go get github.com/gorilla/mux
 RUN go get github.com/go-sql-driver/mysql
 RUN go get github.com/jinzhu/gorm/dialects/mysql
 RUN go get github.com/jinzhu/gorm
-RUN go get github.com/aws/aws-sdk-go-v2/aws
-RUN go get github.com/aws/aws-sdk-go-v2/aws/external
-RUN go get github.com/aws/aws-sdk-go-v2/service/sns
 
 ADD main /webserver/main
 ADD ios /webserver/ios
 ADD server /webserver/server
+ADD libertycars /webserver/libertycars
 ADD fullchain.pem /webserver
 ADD privkey.pem /webserver
 

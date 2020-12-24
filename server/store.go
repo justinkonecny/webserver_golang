@@ -15,7 +15,6 @@ const KeyFirebaseUUID = "FirebaseUUID"
 const KeyUserID = "UserID"
 const KeyUserEmail = "UserEmail"
 const KeyUsername = "Username"
-const KeyUserSubscriptionStatusId = "SNSSubscriptionStatus"
 
 func InitStore(wg *sync.WaitGroup) {
 	defer wg.Done()

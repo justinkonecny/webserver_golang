@@ -12,14 +12,13 @@ import (
 
 type User struct {
 	gorm.Model
-	FirebaseUuid            string
-	FirstName               string
-	LastName                string
-	Email                   string
-	Username                string
-	MobilePhone             string
-	SubscriptionSnsStatusId uint
-	Networks                []Network `gorm:"many2many:network_user"`
+	FirebaseUuid string
+	FirstName    string
+	LastName     string
+	Email        string
+	Username     string
+	MobilePhone  string
+	Networks     []Network `gorm:"many2many:network_user"`
 }
 
 type SubscriptionSnsStatus struct {

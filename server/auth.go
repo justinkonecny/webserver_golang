@@ -43,12 +43,11 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	userID := session.Values[KeyUserID]
 	userEmail := session.Values[KeyUserEmail]
 	username := session.Values[KeyUsername]
-	userSubscriptionStatus := session.Values[KeyUserSubscriptionStatusId]
+
 	fmt.Println("UUID:", firebaseUUID)
 	fmt.Println("UserID:", userID)
 	fmt.Println("UserEmail:", userEmail)
 	fmt.Println("Username:", username)
-	fmt.Println("Subscription Status:", userSubscriptionStatus)
 }
 
 func HandleSignup(w http.ResponseWriter, r *http.Request) {
@@ -99,13 +98,13 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newUser := User{
-		FirebaseUuid:            userDTO.FirebaseUUID,
-		FirstName:               userDTO.FirstName,
-		LastName:                userDTO.LastName,
-		Email:                   userDTO.Email,
-		Username:                userDTO.Username,
-		SubscriptionSnsStatusId: 1,
+		FirebaseUuid: userDTO.FirebaseUUID,
+		FirstName:    userDTO.FirstName,
+		LastName:     userDTO.LastName,
+		Email:        userDTO.Email,
+		Username:     userDTO.Username,
 	}
+
 	if err := DB.Create(&newUser).Error; err != nil {
 		fmt.Println("(AE04) User record creation failed!")
 		fmt.Println(err)
@@ -202,7 +201,6 @@ func processNewSession(session *sessions.Session, w http.ResponseWriter, r *http
 	session.Values[KeyUserID] = user.ID
 	session.Values[KeyUserEmail] = user.Email
 	session.Values[KeyUsername] = user.Username
-	session.Values[KeyUserSubscriptionStatusId] = user.SubscriptionSnsStatusId
 	if err := session.Save(r, w); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return false

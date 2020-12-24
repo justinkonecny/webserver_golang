@@ -15,13 +15,12 @@ func HandleEvents(w http.ResponseWriter, r *http.Request) {
 
 	userID := values[KeyUserID].(uint)
 	username := values[KeyUsername].(string)
-	snsSubscriptionStatusId := values[KeyUserSubscriptionStatusId].(uint)
 
 	switch r.Method {
 	case http.MethodGet:
 		handleEventsGet(w, userID)
 	case http.MethodPost:
-		handleEventsPost(w, r, username, snsSubscriptionStatusId)
+		handleEventsPost(w, r, username)
 	case http.MethodPut:
 		fmt.Println("PUT /events")
 	case http.MethodDelete:
@@ -48,7 +47,7 @@ func handleEventsGet(w http.ResponseWriter, userID uint) {
 	WriteJsonResponse(w, eventsResponse)
 }
 
-func handleEventsPost(w http.ResponseWriter, r *http.Request, username string, snsSubscriptionStatusId uint) {
+func handleEventsPost(w http.ResponseWriter, r *http.Request, username string) {
 	fmt.Println("POST /events")
 	var eventDTO DTOEvent
 	decoder := json.NewDecoder(r.Body)
@@ -68,7 +67,4 @@ func handleEventsPost(w http.ResponseWriter, r *http.Request, username string, s
 	}
 	DB.Create(&event)
 	WriteJsonResponseWithStatus(w, ConvertEvent(event), http.StatusCreated)
-
-	msg := fmt.Sprintf("%s created a new event called '%s'!", username, eventDTO.Name)
-	go NotifyAllNetworkMembers(eventDTO.NetworkId, msg, snsSubscriptionStatusId)
 }
