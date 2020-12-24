@@ -17,8 +17,6 @@ ADD main /webserver/main
 ADD ios /webserver/ios
 ADD server /webserver/server
 ADD libertycars /webserver/libertycars
-ADD fullchain.pem /webserver
-ADD privkey.pem /webserver
 
 RUN go build -o /webserver/run_server /webserver/main/main.go
 

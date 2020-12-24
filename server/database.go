@@ -21,11 +21,6 @@ type User struct {
 	Networks     []Network `gorm:"many2many:network_user"`
 }
 
-type SubscriptionSnsStatus struct {
-	gorm.Model
-	Status string
-}
-
 type Network struct {
 	gorm.Model
 	Name   string

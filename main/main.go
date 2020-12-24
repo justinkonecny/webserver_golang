@@ -70,8 +70,7 @@ func InitWebServer() {
 	if isDevEnv {
 		log.Fatal(http.ListenAndServe("0.0.0.0:"+port, router))
 	} else {
-		log.Fatal(http.ListenAndServeTLS("0.0.0.0:"+port, "fullchain.pem", "privkey.pem", router))
-
+		log.Fatal(http.ListenAndServeTLS("0.0.0.0:"+port, "certs/fullchain.pem", "certs/privkey.pem", router))
 	}
 }
 
