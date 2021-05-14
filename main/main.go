@@ -1,9 +1,10 @@
 package main
 
 import (
-	"../ios"
+	"../calendays"
+	"../common"
 	"../libertycars"
-	"../server"
+	"../q"
 	"fmt"
 	"github.com/gorilla/mux"
 	"log"
@@ -16,22 +17,29 @@ import (
 func main() {
 	fmt.Println("Starting application...")
 
-	server.SetupCommon()
+	common.SetupCommon()
 
 	var wg sync.WaitGroup
-	wg.Add(3)
+	wg.Add(5)
 
-	go ios.InitIOS(&wg)
-	go server.InitStore(&wg)
-	go server.InitDatabase(&wg)
+	// initialize Calendays
+	go calendays.InitStore(&wg)
+	go calendays.InitDatabase(&wg)
+
+	// initialize Q
+	go q.InitAuthDetails(&wg)
+	go q.InitStore(&wg)
+	go q.InitDatabase(&wg)
 
 	wg.Wait()
 
-	defer server.DB.Close()
-	InitWebServer()
+	defer calendays.DB.Close()
+	defer q.DB.Close()
+
+	StartWebServer()
 }
 
-func InitWebServer() {
+func StartWebServer() {
 	isDevEnv := false
 	dev, err := strconv.ParseBool(os.Getenv("DEV"))
 	if err == nil {
@@ -48,32 +56,35 @@ func InitWebServer() {
 	}
 
 	router := mux.NewRouter()
-	router.HandleFunc("/c/login", server.HandleLogin)
-	router.HandleFunc("/c/signup", server.HandleSignup)
-
-	router.HandleFunc("/c/events", server.HandleEvents)
-	router.HandleFunc("/c/networks", server.HandleNetworks)
-	router.HandleFunc("/c/users", server.HandleUsers)
-
-	router.HandleFunc("/c/status/user", server.HandleStatusUser)
-
-	router.HandleFunc("/api/token", ios.HandleToken)
-	router.HandleFunc("/api/refresh_token", ios.HandleRefresh)
-
-	router.HandleFunc("/lc/search", libertycars.HandleSearch)
-	router.HandleFunc("/lc/listing", libertycars.HandleListing)
-
 	router.HandleFunc("/", handleHome)
+
+	// define Calendays routes
+	routerCalendays := router.PathPrefix("/c").Subrouter()
+	routerCalendays.HandleFunc("/login", calendays.HandleLogin)
+	routerCalendays.HandleFunc("/signup", calendays.HandleSignup)
+	routerCalendays.HandleFunc("/events", calendays.HandleEvents)
+	routerCalendays.HandleFunc("/networks", calendays.HandleNetworks)
+	routerCalendays.HandleFunc("/users", calendays.HandleUsers)
+	routerCalendays.HandleFunc("/status/user", calendays.HandleStatusUser)
+
+	// define Q routes
+	routerQ := router.PathPrefix("/q").Subrouter()
+	q.DefineRoutes(routerQ)
+
+	// define Liberty Cars routes
+	routerLibertyCars := router.PathPrefix("/lc").Subrouter()
+	routerLibertyCars.HandleFunc("/search", libertycars.HandleSearch)
+	routerLibertyCars.HandleFunc("/listing", libertycars.HandleListing)
 
 	fmt.Printf("Starting web server on port %s...\n", port)
 
 	if isDevEnv {
 		log.Fatal(http.ListenAndServe("0.0.0.0:"+port, router))
 	} else {
-		log.Fatal(http.ListenAndServeTLS("0.0.0.0:"+port, "letsencrypt/live/api.jkonecny.com/fullchain.pem", "letsencrypt/live/api.jkonecny.com/privkey.pem", router))
+		log.Fatal(http.ListenAndServeTLS("0.0.0.0:"+port, "certs/fullchain.pem", "certs/privkey.pem", router))
 	}
 }
 
 func handleHome(w http.ResponseWriter, r *http.Request) {
-	server.EnableCORS(w, r)
+	common.EnableCORS(w, r)
 }

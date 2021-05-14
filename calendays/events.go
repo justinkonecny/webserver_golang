@@ -1,15 +1,16 @@
-package server
+package calendays
 
 import (
+	"../common"
 	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
 func HandleEvents(w http.ResponseWriter, r *http.Request) {
-	auth, values := AuthenticateRequest(w, r)
+	auth, values := AuthenticateCalendaysRequest(w, r)
 	if !auth {
-		ErrorUnauthorized(w, r)
+		common.ErrorUnauthorized(w, r)
 		return
 	}
 
@@ -26,7 +27,7 @@ func HandleEvents(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete:
 		fmt.Println("DELETE /events")
 	default:
-		ErrorMethodNotAllowed(w, r)
+		common.ErrorMethodNotAllowed(w, r)
 	}
 }
 
@@ -44,7 +45,7 @@ func handleEventsGet(w http.ResponseWriter, userID uint) {
 		eventsResponse = append(eventsResponse, eventsDTO...)
 	}
 
-	WriteJsonResponse(w, eventsResponse)
+	common.WriteJsonResponse(w, eventsResponse)
 }
 
 func handleEventsPost(w http.ResponseWriter, r *http.Request, username string) {
@@ -53,7 +54,7 @@ func handleEventsPost(w http.ResponseWriter, r *http.Request, username string) {
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&eventDTO)
 	if err != nil {
-		ErrorBadRequest(w, r, err)
+		common.ErrorBadRequest(w, r, err)
 		return
 	}
 
@@ -66,5 +67,5 @@ func handleEventsPost(w http.ResponseWriter, r *http.Request, username string) {
 		NetworkId: eventDTO.NetworkId,
 	}
 	DB.Create(&event)
-	WriteJsonResponseWithStatus(w, ConvertEvent(event), http.StatusCreated)
+	common.WriteJsonResponseWithStatus(w, ConvertEvent(event), http.StatusCreated)
 }

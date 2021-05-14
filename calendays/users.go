@@ -1,14 +1,15 @@
-package server
+package calendays
 
 import (
+	"../common"
 	"fmt"
 	"net/http"
 )
 
 func HandleUsers(w http.ResponseWriter, r *http.Request) {
-	auth, values := AuthenticateRequest(w, r)
+	auth, values := AuthenticateCalendaysRequest(w, r)
 	if !auth {
-		ErrorUnauthorized(w, r)
+		common.ErrorUnauthorized(w, r)
 		return
 	}
 
@@ -24,7 +25,7 @@ func HandleUsers(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete:
 		fmt.Println("DELETE /users")
 	default:
-		ErrorMethodNotAllowed(w, r)
+		common.ErrorMethodNotAllowed(w, r)
 	}
 }
 
@@ -32,5 +33,5 @@ func handleUsersGet(w http.ResponseWriter, userID uint) {
 	fmt.Println("GET /users")
 	var user User
 	DB.First(&user, userID)
-	WriteJsonResponse(w, ConvertUser(user))
+	common.WriteJsonResponse(w, ConvertUser(user))
 }

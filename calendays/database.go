@@ -1,4 +1,4 @@
-package server
+package calendays
 
 import (
 	"fmt"
@@ -53,25 +53,26 @@ var DB *gorm.DB
 
 func InitDatabase(wg *sync.WaitGroup) {
 	defer wg.Done()
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
 	dbHost := os.Getenv("DB_HOST")
-	dbSchema := os.Getenv("DB_SCHEMA")
+	dbUser := os.Getenv("DB_CAL_USER")
+	dbPassword := os.Getenv("DB_CAL_PASSWORD")
+	dbSchema := os.Getenv("DB_CAL_SCHEMA")
 
 	if dbUser == "" || dbPassword == "" || dbHost == "" || dbSchema == "" {
-		panic("Missing database connection information")
+		panic("Missing Calendays database connection information")
 	}
 
 	dbInfo := fmt.Sprintf("%s:%s@(%s)/%s?charset=utf8&parseTime=True&loc=Local", dbUser, dbPassword, dbHost, dbSchema)
 	database, err := gorm.Open("mysql", dbInfo)
 	if err != nil {
-		panic("Failed to connect to database")
+		panic("Failed to connect to Calendays database")
 	}
+
 	DB = database
 	DB.SingularTable(true)
 	DB.AutoMigrate(&User{})
 	DB.AutoMigrate(&Network{})
 	DB.AutoMigrate(&Event{})
 	DB.AutoMigrate(&NetworkUser{})
-	fmt.Println("Successfully initialized database connection")
+	fmt.Println("Successfully initialized Calendays database connection")
 }

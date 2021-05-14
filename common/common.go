@@ -1,6 +1,7 @@
-package server
+package common
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -9,11 +10,6 @@ import (
 
 var isDevEnv bool
 
-//var SNSNeverSubscribedID uint
-var SNSSubscribedID uint
-
-//var SNSUnsubscribedID uint
-
 func SetupCommon() {
 	dev, err := strconv.ParseBool(os.Getenv("DEV"))
 	if err != nil {
@@ -21,16 +17,23 @@ func SetupCommon() {
 	} else {
 		isDevEnv = dev
 	}
-
-	//SNSNeverSubscribedID = 1
-	SNSSubscribedID = 2
-	//SNSUnsubscribedID = 3
 }
 
-func AuthenticateRequest(w http.ResponseWriter, r *http.Request) (bool, map[interface{}]interface{}) {
-	EnableCORS(w, r)
-	session, _ := Store.Get(r, "session_calendays")
-	return !session.IsNew, session.Values
+func WriteJsonResponse(w http.ResponseWriter, data interface{}) bool {
+	return WriteJsonResponseWithStatus(w, data, http.StatusOK)
+}
+
+func WriteJsonResponseWithStatus(w http.ResponseWriter, data interface{}, status int) bool {
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		ErrorInternalServerError(w)
+		return false
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_, jsonErr := w.Write(jsonData)
+	return jsonErr == nil
 }
 
 func EnableCORS(w http.ResponseWriter, r *http.Request) {

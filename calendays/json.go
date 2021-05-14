@@ -1,8 +1,6 @@
-package server
+package calendays
 
 import (
-	"encoding/json"
-	"net/http"
 	"time"
 )
 
@@ -41,22 +39,7 @@ type DTOEvent struct {
 	NetworkId uint
 }
 
-func WriteJsonResponse(w http.ResponseWriter, data interface{}) bool {
-	return WriteJsonResponseWithStatus(w, data, http.StatusOK)
-}
 
-func WriteJsonResponseWithStatus(w http.ResponseWriter, data interface{}, status int) bool {
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		ErrorInternalServerError(w)
-		return false
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	_, jsonErr := w.Write(jsonData)
-	return jsonErr == nil
-}
 
 func ConvertNetworkUserList(networkUsers []NetworkUser) []DTONetwork {
 	var networksDTO []DTONetwork

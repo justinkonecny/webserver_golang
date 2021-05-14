@@ -1,15 +1,16 @@
-package server
+package calendays
 
 import (
+	"../common"
 	"encoding/json"
 	"fmt"
 	"net/http"
 )
 
 func HandleNetworks(w http.ResponseWriter, r *http.Request) {
-	auth, values := AuthenticateRequest(w, r)
+	auth, values := AuthenticateCalendaysRequest(w, r)
 	if !auth {
-		ErrorUnauthorized(w, r)
+		common.ErrorUnauthorized(w, r)
 		return
 	}
 
@@ -26,7 +27,7 @@ func HandleNetworks(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete:
 		fmt.Println("DELETE /networks")
 	default:
-		ErrorMethodNotAllowed(w, r)
+		common.ErrorMethodNotAllowed(w, r)
 	}
 }
 
@@ -34,7 +35,7 @@ func handleNetworksGet(w http.ResponseWriter, userID uint) {
 	fmt.Println("GET /networks")
 	var networkUsers []NetworkUser
 	DB.Preload("Network.Users").Where(&NetworkUser{UserId: userID}).Find(&networkUsers)
-	WriteJsonResponse(w, ConvertNetworkUserList(networkUsers))
+	common.WriteJsonResponse(w, ConvertNetworkUserList(networkUsers))
 }
 
 func handleNetworksPost(w http.ResponseWriter, r *http.Request, userID uint, username string) {
@@ -43,7 +44,7 @@ func handleNetworksPost(w http.ResponseWriter, r *http.Request, userID uint, use
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&networkDTO)
 	if err != nil {
-		ErrorBadRequest(w, r, err)
+		common.ErrorBadRequest(w, r, err)
 		return
 	}
 
@@ -84,6 +85,5 @@ func handleNetworksPost(w http.ResponseWriter, r *http.Request, userID uint, use
 
 	var networkFinal Network
 	DB.Preload("Users").Where(&Network{}, network.ID).Find(&networkFinal)
-	WriteJsonResponseWithStatus(w, ConvertNetwork(networkFinal, networkDTO.ColorHex), http.StatusCreated)
+	common.WriteJsonResponseWithStatus(w, ConvertNetwork(networkFinal, networkDTO.ColorHex), http.StatusCreated)
 }
-

@@ -1,6 +1,7 @@
-package server
+package calendays
 
 import (
+	"../common"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/sessions"
@@ -12,10 +13,16 @@ type StatusUser struct {
 	Email    string
 }
 
+func AuthenticateCalendaysRequest(w http.ResponseWriter, r *http.Request) (bool, map[interface{}]interface{}) {
+	common.EnableCORS(w, r)
+	session, _ := Store.Get(r, "session_calendays")
+	return !session.IsNew, session.Values
+}
+
 func HandleLogin(w http.ResponseWriter, r *http.Request) {
-	EnableCORS(w, r)
+	common.EnableCORS(w, r)
 	if r.Method != http.MethodPost {
-		ErrorMethodNotAllowed(w, r)
+		common.ErrorMethodNotAllowed(w, r)
 		return
 	}
 
@@ -51,9 +58,9 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleSignup(w http.ResponseWriter, r *http.Request) {
-	EnableCORS(w, r)
+	common.EnableCORS(w, r)
 	if r.Method != http.MethodPost {
-		ErrorMethodNotAllowed(w, r)
+		common.ErrorMethodNotAllowed(w, r)
 		return
 	}
 
@@ -62,7 +69,7 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&userDTO)
 	if err != nil {
-		ErrorBadRequest(w, r, err)
+		common.ErrorBadRequest(w, r, err)
 		return
 	}
 
@@ -93,7 +100,7 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 		}
 
 		fmt.Println("(AE03) User sign up failed!")
-		WriteJsonResponseWithStatus(w, statusFailed, http.StatusConflict)
+		common.WriteJsonResponseWithStatus(w, statusFailed, http.StatusConflict)
 		return
 	}
 
@@ -141,7 +148,7 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 		"Success":              true,
 	}
 
-	WriteJsonResponseWithStatus(w, statusSuccess, http.StatusCreated)
+	common.WriteJsonResponseWithStatus(w, statusSuccess, http.StatusCreated)
 }
 
 func writeSignupFailedResponse(w http.ResponseWriter, existingEmail bool, existingUsername bool, existingUUID bool) {
@@ -151,13 +158,13 @@ func writeSignupFailedResponse(w http.ResponseWriter, existingEmail bool, existi
 		"ExistingFirebaseUUID": existingUUID,
 		"Success":              false,
 	}
-	WriteJsonResponseWithStatus(w, statusError, http.StatusInternalServerError)
+	common.WriteJsonResponseWithStatus(w, statusError, http.StatusInternalServerError)
 }
 
 func HandleStatusUser(w http.ResponseWriter, r *http.Request) {
-	EnableCORS(w, r)
+	common.EnableCORS(w, r)
 	if r.Method != http.MethodPost {
-		ErrorMethodNotAllowed(w, r)
+		common.ErrorMethodNotAllowed(w, r)
 		return
 	}
 
@@ -166,7 +173,7 @@ func HandleStatusUser(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&statusUser)
 	if err != nil {
-		ErrorBadRequest(w, r, err)
+		common.ErrorBadRequest(w, r, err)
 		return
 	}
 
@@ -177,7 +184,8 @@ func HandleStatusUser(w http.ResponseWriter, r *http.Request) {
 		"ExistingUsername": !usernameNotFound,
 		"ExistingEmail":    !emailNotFound,
 	}
-	WriteJsonResponse(w, status)
+
+	common.WriteJsonResponse(w, status)
 }
 
 func processNewSession(session *sessions.Session, w http.ResponseWriter, r *http.Request) bool {

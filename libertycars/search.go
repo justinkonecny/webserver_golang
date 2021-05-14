@@ -1,7 +1,7 @@
 package libertycars
 
 import (
-	"../server"
+	"../common"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -24,28 +24,28 @@ type ListingRequest struct {
 }
 
 func HandleSearch(w http.ResponseWriter, r *http.Request) {
-	server.EnableCORS(w, r)
+	common.EnableCORS(w, r)
 	switch r.Method {
 	case http.MethodPost:
 		handleSearchPost(w, r)
 	default:
-		server.ErrorMethodNotAllowed(w, r)
+		common.ErrorMethodNotAllowed(w, r)
 	}
 }
 
 func HandleListing(w http.ResponseWriter, r *http.Request) {
-	server.EnableCORS(w, r)
+	common.EnableCORS(w, r)
 	switch r.Method {
 	case http.MethodPost:
 		handleListingPost(w, r)
 	default:
-		server.ErrorMethodNotAllowed(w, r)
+		common.ErrorMethodNotAllowed(w, r)
 	}
 }
 
 func handleListingPost(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		server.ErrorMethodNotAllowed(w, r)
+		common.ErrorMethodNotAllowed(w, r)
 		return
 	}
 
@@ -54,7 +54,7 @@ func handleListingPost(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&listingRequest)
 	if err != nil {
 		fmt.Printf("Listing request decode error: %s\n", err.Error())
-		server.ErrorBadRequest(w, r, err)
+		common.ErrorBadRequest(w, r, err)
 		return
 	}
 
@@ -66,13 +66,13 @@ func handleListingPost(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		fmt.Printf("Listing request error: %s\n", err.Error())
-		server.ErrorBadRequest(w, r, err)
+		common.ErrorBadRequest(w, r, err)
 		return
 	}
 
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
-		server.ErrorBadRequest(w, r, fmt.Errorf("something went wrong"))
+		common.ErrorBadRequest(w, r, fmt.Errorf("something went wrong"))
 		return
 	}
 
@@ -83,7 +83,7 @@ func handleListingPost(w http.ResponseWriter, r *http.Request) {
 
 func handleSearchPost(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		server.ErrorMethodNotAllowed(w, r)
+		common.ErrorMethodNotAllowed(w, r)
 		return
 	}
 
@@ -92,7 +92,7 @@ func handleSearchPost(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&searchRequest)
 	if err != nil {
 		fmt.Printf("Search request decode error: %s\n", err.Error())
-		server.ErrorBadRequest(w, r, err)
+		common.ErrorBadRequest(w, r, err)
 		return
 	}
 
@@ -107,13 +107,13 @@ func handleSearchPost(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		fmt.Printf("Search request error: %s\n", err.Error())
-		server.ErrorBadRequest(w, r, err)
+		common.ErrorBadRequest(w, r, err)
 		return
 	}
 
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
-		server.ErrorBadRequest(w, r, fmt.Errorf("something went wrong"))
+		common.ErrorBadRequest(w, r, fmt.Errorf("something went wrong"))
 		return
 	}
 

@@ -3,3 +3,4 @@ out/
 fs/
 scripts/*
 *.pem
+.DS_Store

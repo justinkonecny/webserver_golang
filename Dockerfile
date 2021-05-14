@@ -14,8 +14,8 @@ RUN go get github.com/jinzhu/gorm/dialects/mysql
 RUN go get github.com/jinzhu/gorm
 
 ADD main /webserver/main
-ADD ios /webserver/ios
-ADD server /webserver/server
+ADD q /webserver/ios
+ADD calendays /webserver/server
 ADD libertycars /webserver/libertycars
 
 RUN go build -o /webserver/run_server /webserver/main/main.go

@@ -1,45 +1,18 @@
-package ios
+package q
 
 import (
-	"../server"
-	"encoding/base64"
+	"../common"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
-	"sync"
 )
 
-var clientID string
-var clientSecret string
-var authHeader string
-var clientCallback = "q://spotify-login-callback"
-var spotifyAccountsEndpoint = "https://accounts.spotify.com/api/token"
-
-func InitIOS(wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	clientID = os.Getenv("SPOTIFY_CLIENT_ID")
-	if clientID == "" {
-		panic("Missing Spotify client ID")
-	}
-	clientSecret = os.Getenv("SPOTIFY_CLIENT_SECRET")
-	if clientSecret == "" {
-		panic("Missing Spotify client secret")
-	}
-
-	authHeader = "Basic " + base64.StdEncoding.EncodeToString([]byte(clientID+":"+clientSecret))
-
-	fmt.Println("Successfully initialized for iOS")
-}
-
-func HandleToken(w http.ResponseWriter, r *http.Request) {
-	//printRequest(r)
+func HandleSpotifyAuthToken(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		server.ErrorMethodNotAllowed(w, r)
+		common.ErrorMethodNotAllowed(w, r)
 		return
 	}
 
@@ -47,14 +20,14 @@ func HandleToken(w http.ResponseWriter, r *http.Request) {
 	values, err := url.ParseQuery(string(body))
 	if err != nil || values == nil {
 		log.Println("Something went wrong processing 'code' request")
-		server.ErrorBadRequest(w, r, fmt.Errorf("missing 'code' parameter"))
+		common.ErrorBadRequest(w, r, fmt.Errorf("missing 'code' parameter"))
 		return
 	}
 
 	code := values.Get("code")
 	if code == "" {
 		log.Println("Missing 'code' parameter")
-		server.ErrorBadRequest(w, r, fmt.Errorf("missing 'code' parameter"))
+		common.ErrorBadRequest(w, r, fmt.Errorf("missing 'code' parameter"))
 		return
 	}
 
@@ -72,7 +45,7 @@ func HandleToken(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		fmt.Printf("Token request error: %s\n", err.Error())
-		server.ErrorBadRequest(w, r, err)
+		common.ErrorBadRequest(w, r, err)
 		return
 	}
 
@@ -80,7 +53,7 @@ func HandleToken(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Token (%s): %s\n", resp.Status, respBody)
 
 	if resp.StatusCode != http.StatusOK {
-		server.ErrorBadRequest(w, r, fmt.Errorf("something went wrong"))
+		common.ErrorBadRequest(w, r, fmt.Errorf("something went wrong"))
 		return
 	}
 
@@ -89,10 +62,9 @@ func HandleToken(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(respBody)
 }
 
-func HandleRefresh(w http.ResponseWriter, r *http.Request) {
-	//printRequest(r)
+func HandleSpotifyRefreshToken(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		server.ErrorMethodNotAllowed(w, r)
+		common.ErrorMethodNotAllowed(w, r)
 		return
 	}
 
@@ -100,14 +72,14 @@ func HandleRefresh(w http.ResponseWriter, r *http.Request) {
 	values, err := url.ParseQuery(string(body))
 	if err != nil || values == nil {
 		log.Println("Something went wrong processing 'refresh_token' request")
-		server.ErrorBadRequest(w, r, fmt.Errorf("missing 'refresh_token' parameter"))
+		common.ErrorBadRequest(w, r, fmt.Errorf("missing 'refresh_token' parameter"))
 		return
 	}
 
 	refreshToken := values.Get("refresh_token")
 	if refreshToken == "" {
 		log.Println("Missing 'refresh_token' parameter")
-		server.ErrorBadRequest(w, r, fmt.Errorf("missing 'refresh_token' parameter"))
+		common.ErrorBadRequest(w, r, fmt.Errorf("missing 'refresh_token' parameter"))
 		return
 	}
 
@@ -124,7 +96,7 @@ func HandleRefresh(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		fmt.Printf("Refresh request error: %s\n", err.Error())
-		server.ErrorBadRequest(w, r, err)
+		common.ErrorBadRequest(w, r, err)
 		return
 	}
 
@@ -132,7 +104,7 @@ func HandleRefresh(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Refresh (%s): %s\n", resp.Status, respBody)
 
 	if resp.StatusCode != http.StatusOK {
-		server.ErrorBadRequest(w, r, fmt.Errorf("something went wrong"))
+		common.ErrorBadRequest(w, r, fmt.Errorf("something went wrong"))
 		return
 	}
 
