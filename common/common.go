@@ -3,6 +3,8 @@ package common
 import (
 	"encoding/json"
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -17,6 +19,26 @@ func SetupCommon() {
 	} else {
 		isDevEnv = dev
 	}
+}
+
+func HashPassword(pwd string) (string, error) {
+	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
+	if err != nil {
+		log.Println("Failed to hash password")
+		log.Println(err)
+		return "", err
+	}
+	return string(hash), nil
+}
+
+func VerifyPassword(hashedPwd string, plainPwd string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPwd), []byte(plainPwd))
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	return true
 }
 
 func WriteJsonResponse(w http.ResponseWriter, data interface{}) bool {
@@ -75,4 +97,3 @@ func EnableCORS(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, FirebaseUUID")
 	w.Header().Set("Access-Control-Allow-Credentials", "true")
 }
-

@@ -1,11 +1,13 @@
 package q
 
-type ErrorMessage struct {
+type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
-type DTOUserSignup struct {
+type UserSignupRequest struct {
 	SpotifyUserID string `json:"spotifyUserID"`
+	Email         string `json:"email"`
 	FirstName     string `json:"firstName"`
 	LastName      string `json:"lastName"`
+	Password      string `json:"password"`
 }

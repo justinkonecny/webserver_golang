@@ -12,8 +12,10 @@ import (
 type User struct {
 	gorm.Model
 	SpotifyUserID string
+	Email         string
 	FirstName     string
 	LastName      string
+	PasswordHash  string
 }
 
 type UserFriend struct {
