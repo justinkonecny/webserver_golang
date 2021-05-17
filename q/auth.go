@@ -70,5 +70,11 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Return a 201 Created
-	w.WriteHeader(http.StatusCreated)
+	common.WriteJsonResponseWithStatus(w, UserResponse{
+		Id:            newUser.ID,
+		SpotifyUserID: newUser.SpotifyUserID,
+		Email:         newUser.Email,
+		FirstName:     newUser.FirstName,
+		LastName:      newUser.LastName,
+	}, http.StatusCreated)
 }
