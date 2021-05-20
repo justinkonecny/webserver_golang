@@ -4,6 +4,7 @@ import (
 	"../common"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"net/http"
 )
 
@@ -60,6 +61,7 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 		FirstName:     userSignupRequest.FirstName,
 		LastName:      userSignupRequest.LastName,
 		PasswordHash:  passwordHash,
+		UUID:          uuid.New().String(),
 	}
 	if err := DB.Create(&newUser).Error; err != nil {
 		fmt.Println("(Q-AHS) User record creation failed!")
@@ -70,11 +72,46 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Return a 201 Created
-	common.WriteJsonResponseWithStatus(w, UserResponse{
-		Id:            newUser.ID,
-		SpotifyUserID: newUser.SpotifyUserID,
-		Email:         newUser.Email,
-		FirstName:     newUser.FirstName,
-		LastName:      newUser.LastName,
-	}, http.StatusCreated)
+	response := GetResponseFromUser(newUser)
+	common.WriteJsonResponseWithStatus(w, response, http.StatusCreated)
+}
+
+func HandleLogin(w http.ResponseWriter, r *http.Request) {
+	common.EnableCORS(w, r)
+	if r.Method != http.MethodPost {
+		common.ErrorMethodNotAllowed(w, r)
+		return
+	}
+	fmt.Println("Q POST /login")
+
+	// Decode the JSON body
+	var userLoginRequest UserLoginRequest
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&userLoginRequest)
+	if err != nil {
+		common.ErrorBadRequest(w, r, err)
+		return
+	}
+
+	if userLoginRequest.Email == "" ||
+		userLoginRequest.SpotifyUserID == "" ||
+		userLoginRequest.Password == "" {
+		errMsg := ErrorResponse{Error: "No field may be blank"}
+		common.WriteJsonResponseWithStatus(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	var user User
+	if result := DB.First(&user, "spotify_user_id = ? AND email = ?", userLoginRequest.SpotifyUserID, userLoginRequest.Email); result.Error != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	if !common.VerifyPassword(user.PasswordHash, userLoginRequest.Password) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	response := GetResponseFromUser(user)
+	common.WriteJsonResponseWithStatus(w, response, http.StatusOK)
 }

@@ -36,4 +36,5 @@ func DefineRoutes(router *mux.Router) {
 	router.HandleFunc("/spotify/refresh_token", HandleSpotifyRefreshToken)
 
 	router.HandleFunc("/auth/signup", HandleSignup)
+	router.HandleFunc("/auth/login", HandleLogin)
 }

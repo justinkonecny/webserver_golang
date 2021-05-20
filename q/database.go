@@ -11,8 +11,9 @@ import (
 
 type User struct {
 	gorm.Model
-	SpotifyUserID string
-	Email         string
+	UUID          string `gorm:"uniqueIndex"`
+	SpotifyUserID string `gorm:"uniqueIndex"`
+	Email         string `gorm:"uniqueIndex"`
 	FirstName     string
 	LastName      string
 	PasswordHash  string
@@ -20,7 +21,7 @@ type User struct {
 
 type UserFriend struct {
 	gorm.Model
-	UserId       uint
+	UserID       uint
 	FriendUserID uint
 	User         User
 	UserFriend   User `gorm:"foreignKey:FriendUserId"`
