@@ -28,7 +28,6 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 	if userSignupRequest.FirstName == "" ||
 		userSignupRequest.LastName == "" ||
 		userSignupRequest.Email == "" ||
-		userSignupRequest.SpotifyUserID == "" ||
 		userSignupRequest.Password == "" {
 		errMsg := ErrorResponse{Error: "No field may be blank"}
 		common.WriteJsonResponseWithStatus(w, errMsg, http.StatusBadRequest)
@@ -37,9 +36,9 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 
 	// Check for duplicate users
 	var users []User
-	DB.Where("spotify_user_id = ?", userSignupRequest.SpotifyUserID).Find(&users)
+	DB.Where("email = ?", userSignupRequest.Email).Find(&users)
 	if len(users) != 0 {
-		fmt.Println("(Q-AHS) User sign up failed!")
+		fmt.Println("(Q-A.HS) User sign up failed!")
 		errMsg := ErrorResponse{Error: "User already exists"}
 		common.WriteJsonResponseWithStatus(w, errMsg, http.StatusConflict)
 		return
@@ -47,7 +46,7 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 
 	passwordHash, err := common.HashPassword(userSignupRequest.Password)
 	if err != nil {
-		fmt.Println("(Q-AHS) Failed to hash password!")
+		fmt.Println("(Q-A.HS) Failed to hash password!")
 		fmt.Println(err)
 		errMsg := ErrorResponse{Error: "Unknown error occurred trying to create a new User"}
 		common.WriteJsonResponseWithStatus(w, errMsg, http.StatusInternalServerError)
@@ -56,7 +55,6 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 
 	// Create new User in DB
 	newUser := User{
-		SpotifyUserID: userSignupRequest.SpotifyUserID,
 		Email:         userSignupRequest.Email,
 		FirstName:     userSignupRequest.FirstName,
 		LastName:      userSignupRequest.LastName,
@@ -64,8 +62,14 @@ func HandleSignup(w http.ResponseWriter, r *http.Request) {
 		UUID:          uuid.New().String(),
 	}
 	if err := DB.Create(&newUser).Error; err != nil {
-		fmt.Println("(Q-AHS) User record creation failed!")
-		fmt.Println(err)
+		fmt.Println("(Q-A.HS) User record creation failed with error:", err)
+		errMsg := ErrorResponse{Error: "Unknown error occurred trying to create a new User"}
+		common.WriteJsonResponseWithStatus(w, errMsg, http.StatusInternalServerError)
+		return
+	}
+
+	if session := CreateNewSession(w, r, newUser); session == nil {
+		fmt.Println("(Q-A.HS) User session creation failed!")
 		errMsg := ErrorResponse{Error: "Unknown error occurred trying to create a new User"}
 		common.WriteJsonResponseWithStatus(w, errMsg, http.StatusInternalServerError)
 		return
@@ -94,7 +98,6 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if userLoginRequest.Email == "" ||
-		userLoginRequest.SpotifyUserID == "" ||
 		userLoginRequest.Password == "" {
 		errMsg := ErrorResponse{Error: "No field may be blank"}
 		common.WriteJsonResponseWithStatus(w, errMsg, http.StatusBadRequest)
@@ -102,13 +105,20 @@ func HandleLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var user User
-	if result := DB.First(&user, "spotify_user_id = ? AND email = ?", userLoginRequest.SpotifyUserID, userLoginRequest.Email); result.Error != nil {
+	if result := DB.First(&user, "email = ?", userLoginRequest.Email); result.Error != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
 	if !common.VerifyPassword(user.PasswordHash, userLoginRequest.Password) {
 		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	if session := CreateNewSession(w, r, user); session == nil {
+		fmt.Println("(Q-A.HL) User session creation failed!")
+		errMsg := ErrorResponse{Error: "Unknown error occurred trying to authenticate User"}
+		common.WriteJsonResponseWithStatus(w, errMsg, http.StatusInternalServerError)
 		return
 	}
 

@@ -24,7 +24,10 @@ type ListingRequest struct {
 }
 
 func HandleSearch(w http.ResponseWriter, r *http.Request) {
-	common.EnableCORS(w, r)
+	if !AuthenticateLibertyCarsRequest(w, r) {
+		return
+	}
+
 	switch r.Method {
 	case http.MethodPost:
 		handleSearchPost(w, r)
@@ -34,7 +37,10 @@ func HandleSearch(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleListing(w http.ResponseWriter, r *http.Request) {
-	common.EnableCORS(w, r)
+	if !AuthenticateLibertyCarsRequest(w, r) {
+		return
+	}
+
 	switch r.Method {
 	case http.MethodPost:
 		handleListingPost(w, r)

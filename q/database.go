@@ -12,7 +12,6 @@ import (
 type User struct {
 	gorm.Model
 	UUID          string `gorm:"uniqueIndex"`
-	SpotifyUserID string `gorm:"uniqueIndex"`
 	Email         string `gorm:"uniqueIndex"`
 	FirstName     string
 	LastName      string
