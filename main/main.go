@@ -20,7 +20,7 @@ func main() {
 	common.SetupCommon()
 
 	var wg sync.WaitGroup
-	wg.Add(5)
+	wg.Add(6)
 
 	// initialize Calendays
 	go calendays.InitStore(&wg)
@@ -30,6 +30,9 @@ func main() {
 	go q.InitAuthDetails(&wg)
 	go q.InitStore(&wg)
 	go q.InitDatabase(&wg)
+
+	// initialize LibertyCars
+	go libertycars.InitAuth(&wg)
 
 	wg.Wait()
 

@@ -78,13 +78,13 @@ func handleListingPost(w http.ResponseWriter, r *http.Request) {
 
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
-		common.ErrorBadRequest(w, r, fmt.Errorf("something went wrong"))
+		errMsg := fmt.Sprintf("something went wrong (%d)", resp.StatusCode)
+		common.ErrorBadRequest(w, r, fmt.Errorf(errMsg))
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(respBody)
-
 }
 
 func handleSearchPost(w http.ResponseWriter, r *http.Request) {
@@ -119,7 +119,8 @@ func handleSearchPost(w http.ResponseWriter, r *http.Request) {
 
 	respBody, _ := ioutil.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
-		common.ErrorBadRequest(w, r, fmt.Errorf("something went wrong"))
+		errMsg := fmt.Sprintf("something went wrong (%d)", resp.StatusCode)
+		common.ErrorBadRequest(w, r, fmt.Errorf(errMsg))
 		return
 	}
 
